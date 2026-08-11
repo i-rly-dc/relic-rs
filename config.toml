@@ -1,0 +1,84 @@
+# relic-rs configuration
+# Install to ~/.config/relic-rs/config.toml (or run with --config, or run
+# from the directory containing this file).
+
+# EE.log, or the directory containing it. Can be overridden on the CLI.
+log_path = "YOURPATH_HERE"
+
+# Case-insensitive substring of the game window title to capture.
+window_title = "Warframe"
+
+# "auto"    - game window if found, else monitor (default)
+# "window"  - game window only, error if not found
+# "monitor" - always the whole monitor; use this if window capture returns
+#             black/stale frames on your setup
+# On KDE Wayland: "window" captures the game (an XWayland client) in ~30ms
+# and is FRESH whenever the game has focus — i.e. for F12 and EE.log triggers.
+# It can return a stale frame if triggered while another window has focus
+# (e.g. Enter in the terminal). "monitor" is always fresh but goes through
+# the desktop portal, which takes ~5s per shot. Prefer auto + F12.
+capture = "auto"
+
+# Monitor index for monitor capture, 0-based.
+monitor = 0
+
+# Reject fuzzy matches whose normalized Levenshtein distance is above this
+# (0 = exact match required, 1 = accept anything).
+match_threshold = 0.45
+
+# Black out everything in the name band that isn't reward-name orange before
+# OCR. Off: it was a workaround for names fusing during recognition, which
+# column splitting now prevents outright (verified identical reads with it on
+# and off across every archived reward screen), and it only understands one
+# UI theme's text color. Turn on only if a busy background defeats the OCR.
+color_key = false
+
+# If an automatic trigger (scan/EE.log) recognizes the SAME rewards in the
+# same order within this many seconds of the last check, print nothing and
+# save no screenshot. Manual triggers (Enter/F12) always print. 0 disables.
+dedupe_secs = 30
+
+# One region spanning ALL the reward-name text, as FRACTIONS of the captured
+# image (0.0-1.0): as wide as the 4-player card strip, tall enough for
+# two-line wrapped names. Individual names are split automatically from the
+# detected text positions, so 1-4 rewards all work regardless of how the
+# centered cards shift with squad size.
+# Verify with `relic-rs --once --dump-crops`: /tmp/relic-rs/band.png
+# must contain all reward names.
+[band]
+x = 0.24
+y = 0.372
+w = 0.52
+h = 0.062
+
+# Screen scanner: OCRs the "VOID FISSURE/REWARDS" title strip every
+# interval_ms and triggers a check the moment the reward screen appears —
+# seconds faster than the EE.log trigger (the game flushes its log late).
+# Captures the game window only, ~30ms + a small OCR per scan; idles when the
+# game isn't running. False hits are silent (nothing prints unless real
+# reward names are found). Region = title location as screen fractions;
+# verify with: cargo run --release --example find_text -- shot.png
+[scan]
+enabled = true
+interval_ms = 1000
+x = 0.13
+y = 0.028
+w = 0.33
+h = 0.06
+
+# Desktop notification with the results, drawn on top of the game (KDE shows
+# critical-urgency notifications above fullscreen windows, on the primary
+# monitor). Each new reward screen replaces the previous popup.
+[notify]
+enabled = false
+timeout_ms = 15000
+urgency = "critical"
+
+# On-screen overlay panel (WFInfo style): drawn over the game via
+# layer-shell, one column per reward aligned under the centered cards, best
+# pick highlighted in gold, click-through. y defaults to just below the
+# reward-name band; height is a screen fraction.
+[overlay]
+enabled = true
+timeout_ms = 15000
+height = 0.075

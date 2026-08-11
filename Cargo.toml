@@ -1,0 +1,36 @@
+[package]
+name = "relic-check"
+version = "1.6.2"
+edition = "2024"
+
+[dependencies]
+ab_glyph = "0.2.32"
+anyhow = "1.0.103"
+evdev = "0.13.2"
+image = "0.25.10"
+ocrs = "0.12.2"
+rten = "0.24.0"
+rten-imageproc = "0.24"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+smithay-client-toolkit = "0.20.0"
+strsim = "0.11.1"
+toml = "1.1.2"
+ureq = "3.3.0"
+xcap = "0.9.6"
+zbus = "5"
+
+# ocrs/rten are 10-50x slower without optimizations. The tool is only usable
+# as a release build; this also keeps `cargo build` (dev) workable for testing
+# by optimizing dependencies even in dev profile.
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+
+[dev-dependencies]
+ab_glyph = "0.2.32"
