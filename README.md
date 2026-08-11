@@ -18,8 +18,8 @@ platinum and ducat value, best pick highlighted.*
 > [Calibrating the capture band](#calibrating-the-capture-band). Known
 > limitations: Requiem/Kuva relic rewards are rendered as glyph artwork with
 > no text, so they can't be read at all; the screen scanner is tuned to the
-> English UI; and OCR can still misread a name, so treat the output as a
-> strong hint rather than gospel. Expect bugs.
+> English UI; and OCR can still misread a name, so treat the output with a grain
+> of salt. Expect bugs.
 
 Everything is pure/vendored Rust: OCR is [`ocrs`](https://github.com/robertknight/ocrs)
 (no Tesseract), HTTP is `ureq` with rustls, capture is `xcap`. The OCR models
