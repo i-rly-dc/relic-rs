@@ -1,9 +1,25 @@
-# relic-rs
+# relic-check
 
 Warframe relic-reward price checker for Linux (X11 and Wayland). When you
 crack a relic, it reads the four reward names off the screen, looks up
 warframe.market prices, and prints the best pick — fast enough to act on
 before the reward timer runs out.
+
+![relic-check overlay showing platinum and ducat values under each reward card](images/splash.png)
+
+*The overlay drawn over the live reward screen: each reward with its
+platinum and ducat value, best pick highlighted.*
+
+> [!WARNING]
+> **Work in progress.** This is rough around the edges and may not work on
+> your setup without tuning. It was built and tested against one machine
+> (KDE Wayland, 3840×2160, 16:9, Stalker UI theme), so expect to recalibrate
+> the capture regions for other resolutions and aspect ratios — see
+> [Calibrating the capture band](#calibrating-the-capture-band). Known
+> limitations: Requiem/Kuva relic rewards are rendered as glyph artwork with
+> no text, so they can't be read at all; the screen scanner is tuned to the
+> English UI; and OCR can still misread a name, so treat the output as a
+> strong hint rather than gospel. Expect bugs.
 
 Everything is pure/vendored Rust: OCR is [`ocrs`](https://github.com/robertknight/ocrs)
 (no Tesseract), HTTP is `ureq` with rustls, capture is `xcap`. The OCR models
@@ -28,10 +44,10 @@ for dependencies.
 ## Run
 
 ```sh
-./target/release/relic-rs                 # uses ./config.toml
-./target/release/relic-rs /path/to/EE.log # override the log path
-./target/release/relic-rs --once          # single check right now, then exit
-./target/release/relic-rs --save-shots ~/relic-shots  # archive screenshots
+./target/release/relic-check                 # uses ./config.toml
+./target/release/relic-check /path/to/EE.log # override the log path
+./target/release/relic-check --once          # single check right now, then exit
+./target/release/relic-check --save-shots ~/relic-shots  # archive screenshots
 ```
 
 `--save-shots <dir>` writes every check's full screenshot to
@@ -39,11 +55,11 @@ for dependencies.
 costs no reaction time). Replay one later without the game running:
 
 ```sh
-RELIC_CHECK_FAKE_SHOT=shot-20260712-133448-EE.log.png relic-rs --once
+RELIC_CHECK_FAKE_SHOT=shot-20260712-133448-EE.log.png relic-check --once
 ```
 
 Config is read from `--config <path>`, else `./config.toml`, else
-`~/.config/relic-rs/config.toml`, else built-in defaults.
+`~/.config/relic-check/config.toml`, else built-in defaults.
 
 A check is triggered by any of:
 
@@ -105,9 +121,9 @@ The default band assumes a 16:9 game at 100% HUD scale. If nothing is
 recognized on a real reward screen:
 
 1. Get to a reward screen (or take a screenshot of one).
-2. Run `relic-rs --once --dump-crops`. With a saved screenshot you don't
-   even need the game: `RELIC_CHECK_FAKE_SHOT=shot.png relic-rs --once --dump-crops`.
-3. Look at `/tmp/relic-rs/band.png` — it must contain every reward name
+2. Run `relic-check --once --dump-crops`. With a saved screenshot you don't
+   even need the game: `RELIC_CHECK_FAKE_SHOT=shot.png relic-check --once --dump-crops`.
+3. Look at `/tmp/relic-check/band.png` — it must contain every reward name
    (two-line wraps included). `screenshot.png` is the full capture for
    measuring: pixel position ÷ screen size = the fraction to put in the config.
 4. Adjust `[band]` and repeat.
@@ -124,7 +140,7 @@ but if a slot is consistently unrecognized, recalibrate.
 
 ## Caching
 
-Kept under `~/.cache/relic-rs/` to stay off the API during play:
+Kept under `~/.cache/relic-check/` to stay off the API during play:
 
 - `items.json` — the item list, refreshed after 24 h (a stale copy is still
   used if warframe.market is unreachable).
@@ -140,8 +156,8 @@ Kept under `~/.cache/relic-rs/` to stay off the API during play:
 Replay any saved screenshot through the whole pipeline without the game:
 
 ```sh
-RELIC_CHECK_FAKE_SHOT=shot.png relic-rs --once
-RELIC_CHECK_FAKE_SHOT=shot.png relic-rs --once --scan-test  # would the scanner fire?
+RELIC_CHECK_FAKE_SHOT=shot.png relic-check --once
+RELIC_CHECK_FAKE_SHOT=shot.png relic-check --once --scan-test  # would the scanner fire?
 ```
 
 `--scan-test` prints the raw title read and whether the screen scanner would
